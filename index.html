@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ดวงรายวัน Y · ปี 2569</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&family=Cinzel:wght@600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body {
+  background: #080612; background-color: #080612;
+  color: #ddd8f0; font-family: 'Sarabun', Tahoma, Arial, sans-serif;
+  min-height: 100vh; overscroll-behavior: none;
+}
+
+/* KEY SETUP SCREEN */
+.setup-screen {
+position: fixed; inset: 0; background: #080612; z-index: 999;
+display: flex; align-items: center; justify-content: center; padding: 24px;
+}
+.setup-box {
+background: #120f28; border: 1px solid rgba(201,168,76,0.25);
+border-radius: 20px; padding: 28px 24px; width: 100%; max-width: 400px;
+}
+.setup-logo { font-family: ‘Cinzel’, Georgia, serif; font-size: 22px; color: #e8d08a; text-align: center; margin-bottom: 6px; }
+.setup-sub { font-size: 12px; color: #7060a0; text-align: center; margin-bottom: 24px; }
+.setup-label { font-size: 12px; color: #c9a84c; margin-bottom: 8px; display: block; }
+.setup-input {
+width: 100%; background: #0d0a20; border: 1px solid rgba(201,168,76,0.2);
+border-radius: 10px; padding: 12px 14px; color: #ddd8f0; font-size: 13px;
+font-family: ‘Sarabun’, Tahoma, Arial, sans-serif; outline: none;
+margin-bottom: 8px; transition: border-color 0.2s;
+}
+.setup-input:focus { border-color: rgba(201,168,76,0.5); }
+.setup-hint { font-size: 11px; color: #504070; margin-bottom: 20px; line-height: 1.6; }
+.setup-hint a { color: #7060a0; }
+.setup-btn {
+width: 100%; padding: 13px; background: #c9a84c; color: #080612;
+border: none; border-radius: 12px; font-size: 14px; font-weight: 700;
+font-family: ‘Sarabun’, Tahoma, Arial, sans-serif; cursor: pointer;
+transition: opacity 0.2s;
+}
+.setup-btn:active { opacity: 0.8; }
+.setup-err { font-size: 12px; color: #e74c3c; margin-top: 10px; text-align: center; display: none; }
+
+/* MAIN APP */
+.app { display: none; }
+.hdr {
+background: #120f28; border-bottom: 1px solid rgba(180,150,80,0.2);
+padding: 16px 16px 12px; text-align: center; position: sticky; top: 0; z-index: 100;
+}
+.hdr-title { font-family: ‘Cinzel’, Georgia, serif; font-size: 18px; color: #e8d08a; letter-spacing: 2px; }
+.hdr-sub { font-size: 11px; color: #7060a0; margin-top: 3px; }
+.hdr-key-btn {
+position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+font-size: 10px; color: #504070; background: #161230;
+border: 1px solid rgba(180,150,80,0.15); border-radius: 8px;
+padding: 4px 8px; cursor: pointer;
+}
+.month-tabs {
+display: flex; overflow-x: auto; gap: 6px; padding: 10px 16px;
+background: #100e22; border-bottom: 1px solid rgba(180,150,80,0.15);
+scrollbar-width: none; position: sticky; top: 64px; z-index: 99;
+}
+.month-tabs::-webkit-scrollbar { display: none; }
+.mtab {
+flex-shrink: 0; padding: 6px 14px; border-radius: 20px;
+border: 1px solid rgba(180,150,80,0.2); background: #161230; color: #7060a0;
+font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+white-space: nowrap; font-family: ‘Sarabun’, Tahoma, Arial, sans-serif;
+}
+.mtab.active { background: #c9a84c; color: #080612; border-color: #c9a84c; }
+.summary-bar {
+display: flex; gap: 8px; padding: 8px 16px; overflow-x: auto;
+scrollbar-width: none; background: #080612;
+}
+.summary-bar::-webkit-scrollbar { display: none; }
+.sbar-item { flex-shrink: 0; display: flex; align-items: center; gap: 5px; font-size: 11px; color: #7060a0; }
+.sbar-dot { width: 8px; height: 8px; border-radius: 50%; }
+.cal-wrap { padding: 8px 10px 130px; background: #080612; }
+.month-label {
+font-family: ‘Cinzel’, Georgia, serif; font-size: 13px; color: #c9a84c;
+letter-spacing: 2px; margin: 14px 0 10px; padding-bottom: 6px;
+border-bottom: 1px solid rgba(180,150,80,0.15);
+}
+.cal-header { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; margin-bottom: 4px; }
+.cal-dow { text-align: center; font-size: 10px; color: #7060a0; padding: 4px 0; font-weight: 600; }
+.cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; }
+.cal-cell {
+aspect-ratio: 1; border-radius: 8px; display: flex; flex-direction: column;
+align-items: center; justify-content: center; cursor: pointer; position: relative;
+border: 1px solid transparent; min-height: 40px; transition: transform 0.12s;
+}
+.cal-cell:active { transform: scale(0.9); }
+.cal-day { font-size: 13px; font-weight: 700; line-height: 1; }
+.cal-score { font-size: 9px; margin-top: 2px; font-weight: 600; opacity: 0.85; }
+.cal-bar { position: absolute; bottom: 3px; left: 4px; right: 4px; height: 2px; border-radius: 2px; opacity: 0.7; }
+
+/* PANEL */
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 190; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
+.overlay.show { opacity: 1; pointer-events: auto; }
+.detail-panel {
+position: fixed; bottom: 0; left: 0; right: 0; background: #100e22;
+border-top: 1px solid rgba(180,150,80,0.2); border-radius: 20px 20px 0 0;
+transform: translateY(100%); transition: transform 0.32s cubic-bezier(0.34,1.4,0.64,1);
+z-index: 200; max-height: 88vh; overflow-y: auto;
+}
+.detail-panel.open { transform: translateY(0); }
+.panel-handle { width: 36px; height: 4px; background: rgba(180,150,80,0.25); border-radius: 2px; margin: 12px auto 0; }
+.panel-content { padding: 14px 16px 36px; }
+.panel-date { font-family: ‘Cinzel’, Georgia, serif; font-size: 15px; color: #e8d08a; margin-bottom: 3px; }
+.panel-weekday { font-size: 12px; color: #7060a0; margin-bottom: 12px; }
+.score-display {
+display: flex; align-items: center; gap: 14px; background: #161230;
+border-radius: 14px; padding: 14px 16px; margin-bottom: 16px;
+border: 1px solid rgba(180,150,80,0.15);
+}
+.score-circle {
+width: 58px; height: 58px; border-radius: 50%; display: flex; flex-direction: column;
+align-items: center; justify-content: center; flex-shrink: 0; border: 2px solid currentColor;
+}
+.score-num { font-family: ‘Cinzel’, Georgia, serif; font-size: 24px; font-weight: 700; line-height: 1; }
+.score-max { font-size: 10px; opacity: 0.6; }
+.score-label { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+.score-desc { font-size: 12px; color: #7060a0; line-height: 1.5; }
+.ai-loading {
+display: flex; align-items: center; justify-content: center; gap: 10px;
+padding: 36px 16px; color: #7060a0; font-size: 13px;
+}
+.ai-spinner {
+width: 20px; height: 20px; border: 2px solid rgba(201,168,76,0.2);
+border-top-color: #c9a84c; border-radius: 50%;
+animation: spin 0.8s linear infinite; flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.overall-box {
+background: linear-gradient(135deg,rgba(201,168,76,0.08),rgba(201,168,76,0.02));
+border: 1px solid rgba(201,168,76,0.22); border-radius: 12px; padding: 13px 14px; margin-bottom: 10px;
+}
+.overall-box h4 { font-size: 12px; color: #c9a84c; margin-bottom: 7px; }
+.overall-box p { font-size: 13px; color: #a090c0; line-height: 1.8; }
+.do-dont { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.do-box { background: rgba(46,204,113,0.06); border: 1px solid rgba(46,204,113,0.2); border-radius: 10px; padding: 10px 12px; }
+.dont-box { background: rgba(231,76,60,0.06); border: 1px solid rgba(231,76,60,0.2); border-radius: 10px; padding: 10px 12px; }
+.do-box h5 { font-size: 11px; color: #2ecc71; margin-bottom: 6px; }
+.dont-box h5 { font-size: 11px; color: #e74c3c; margin-bottom: 6px; }
+.do-box ul,.dont-box ul { list-style: none; padding: 0; }
+.do-box li,.dont-box li { font-size: 11px; color: #a090c0; line-height: 1.75; padding-left: 14px; position: relative; }
+.do-box li::before { content: ‘✓’; position: absolute; left: 0; color: #2ecc71; font-size: 10px; }
+.dont-box li::before { content: ‘✗’; position: absolute; left: 0; color: #e74c3c; font-size: 10px; }
+.area-card { background: #161230; border-radius: 12px; padding: 13px 14px; margin-bottom: 9px; border: 1px solid rgba(180,150,80,0.1); }
+.area-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.area-icon { font-size: 20px; flex-shrink: 0; }
+.area-title { font-size: 13px; font-weight: 700; flex: 1; }
+.area-level { font-size: 10px; font-weight: 700; padding: 2px 9px; border-radius: 10px; white-space: nowrap; }
+.lv-good { background: rgba(46,204,113,0.15); color: #2ecc71; border: 1px solid rgba(46,204,113,0.3); }
+.lv-ok   { background: rgba(241,196,15,0.15);  color: #f1c40f; border: 1px solid rgba(241,196,15,0.3); }
+.lv-warn { background: rgba(231,76,60,0.15);   color: #e74c3c; border: 1px solid rgba(231,76,60,0.3); }
+.lv-norm { background: rgba(149,165,166,0.15); color: #95a5a6; border: 1px solid rgba(149,165,166,0.3); }
+.area-body { font-size: 13px; color: #a090c0; line-height: 1.75; }
+.ai-error { padding: 20px 16px; text-align: center; }
+.ai-error p { color: #e74c3c; font-size: 13px; margin-bottom: 12px; }
+.retry-btn {
+padding: 8px 22px; background: #161230; border: 1px solid rgba(201,168,76,0.3);
+color: #c9a84c; border-radius: 20px; cursor: pointer; font-size: 12px;
+font-family: ‘Sarabun’, Tahoma, Arial, sans-serif;
+}
+</style>
+
+</head>
+<body>
+
+<!-- KEY SETUP SCREEN -->
+
+<div class="setup-screen" id="setupScreen">
+  <div class="setup-box">
+    <div class="setup-logo">Y · ดวงรายวัน 2569</div>
+    <div class="setup-sub">21 ม.ค. 2528 · ลัคนามกร</div>
+    <label class="setup-label">🔑 กรอก Groq API Key</label>
+    <input class="setup-input" type="password" id="keyInput" placeholder="gsk_..." autocomplete="off" autocorrect="off" spellcheck="false">
+    <div class="setup-hint">
+      Key จะถูกเก็บไว้ในเครื่องนี้เท่านั้น ไม่ได้อยู่ใน code<br>
+      ขอ key ฟรีได้ที่ <a href="https://console.groq.com" target="_blank">console.groq.com</a>
+    </div>
+    <button class="setup-btn" onclick="saveKey()">เข้าสู่ระบบ →</button>
+    <div class="setup-err" id="setupErr">Key ไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง</div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+
+<div class="app" id="app">
+  <div class="hdr" style="position:relative;">
+    <div class="hdr-title">Y · ดวงรายวัน 2569</div>
+    <div class="hdr-sub">21 ม.ค. 2528 · ลัคนามกร · กดวันเพื่อดูคำทำนาย</div>
+    <div class="hdr-key-btn" onclick="changeKey()">🔑 เปลี่ยน Key</div>
+  </div>
+
+  <div class="month-tabs" id="monthTabs"></div>
+
+  <div class="summary-bar">
+    <div class="sbar-item"><div class="sbar-dot" style="background:#e74c3c"></div>แย่มาก</div>
+    <div class="sbar-item"><div class="sbar-dot" style="background:#e67e22"></div>แย่</div>
+    <div class="sbar-item"><div class="sbar-dot" style="background:#d4ac0d"></div>ธรรมดา</div>
+    <div class="sbar-item"><div class="sbar-dot" style="background:#27ae60"></div>ดี</div>
+    <div class="sbar-item"><div class="sbar-dot" style="background:#1abc9c"></div>ดีมาก</div>
+    <div class="sbar-item"><div class="sbar-dot" style="background:#2e86c1"></div>ดีเยี่ยม</div>
+    <div class="sbar-item"><div class="sbar-dot" style="background:#8e44ad"></div>โดดเด่น</div>
+  </div>
+
+  <div class="cal-wrap" id="calWrap"></div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closePanel()"></div>
+<div class="detail-panel" id="detailPanel">
+  <div class="panel-handle"></div>
+  <div class="panel-content" id="panelContent"></div>
+</div>
+
+<script>
+const GROQ_MODEL = 'llama-3.3-70b-versatile';
+const LS_KEY = 'groq_api_key_y2569';
+
+// ===== KEY MANAGEMENT =====
+let GROQ_KEY = '';
+
+function saveKey(){
+  const val = document.getElementById('keyInput').value.trim();
+  if(!val.startsWith('gsk_') || val.length < 20){
+    document.getElementById('setupErr').style.display = 'block';
+    return;
+  }
+  localStorage.setItem(LS_KEY, val);
+  GROQ_KEY = val;
+  document.getElementById('setupScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  initApp();
+}
+
+function changeKey(){
+  localStorage.removeItem(LS_KEY);
+  location.reload();
+}
+
+document.getElementById('keyInput').addEventListener('keydown', e => { if(e.key==='Enter') saveKey(); });
+
+// Check saved key on load
+window.addEventListener('load', () => {
+  const saved = localStorage.getItem(LS_KEY);
+  if(saved && saved.startsWith('gsk_')){
+    GROQ_KEY = saved;
+    document.getElementById('setupScreen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    initApp();
+  }
+});
+
+// ===== NATAL DATA =====
+const NATAL={asc:271.97,sun:300.80,moon:298.47,mercury:282.66,venus:345.83,mars:350.31,jupiter:266.75,saturn:236.41,rahu:55.26};
+const MONTH_TH   = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const MONTH_FULL = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const DOW_TH   = ['อา','จ','อ','พ','พฤ','ศ','ส'];
+const DOW_FULL = ['วันอาทิตย์','วันจันทร์','วันอังคาร','วันพุธ','วันพฤหัสบดี','วันศุกร์','วันเสาร์'];
+const SIGNS    = ['เมษ','พฤษภ','เมถุน','กรกฎ','สิงห์','กันย์','ตุลย์','พิจิก','ธนู','มกร','กุมภ์','มีน'];
+const PNAMES   = {sun:'พระอาทิตย์',moon:'พระจันทร์',mercury:'พระพุธ',venus:'พระศุกร์',mars:'พระอังคาร',jupiter:'พระพฤหัส',saturn:'พระเสาร์',rahu:'พระราหู',asc:'ลัคนา'};
+const ANAMES   = {Conjunction:'โคจรทับ',Opposition:'โคจรเผชิญหน้า',Trine:'โคจรเสริม',Square:'โคจรขัด',Sextile:'โคจรหนุน',Quincunx:'โคจรกดดันเล็กน้อย'};
+
+// ===== TRANSIT ENGINE =====
+const DM  = {sun:0.9856,moon:13.1764,mercury:1.3833,venus:1.2,mars:0.524,jupiter:0.0831,saturn:0.0334,rahu:-0.0529};
+const B26 = {sun:280.5,moon:72.3,mercury:270.1,venus:315.4,mars:101.2,jupiter:58.8,saturn:345.6,rahu:11.2};
+const MR=[{s:50,e:72},{s:166,e:189},{s:281,e:305}];
+const VR=[{s:1,e:90}]; const JR=[{s:1,e:35}];
+
+function getDOY(d){ return Math.floor((d-new Date(2026,0,1))/86400000)+1; }
+function signOf(deg){ return SIGNS[Math.floor(((deg%360)+360)%360/30)]; }
+function tpos(p,doy){
+  let b=B26[p],m=DM[p];
+  if(p==='mercury') MR.forEach(r=>{if(doy>=r.s&&doy<=r.e)m=-m*0.8;});
+  if(p==='venus')   VR.forEach(r=>{if(doy>=r.s&&doy<=r.e)m=-0.5;});
+  if(p==='jupiter') JR.forEach(r=>{if(doy>=r.s&&doy<=r.e)m=-0.03;});
+  return((b+m*(doy-1))%360+360)%360;
+}
+function adiff(a,b){let d=Math.abs(a-b)%360;return d>180?360-d:d;}
+const ASPS=[{n:'Conjunction',d:0,o:6,w:1},{n:'Opposition',d:180,o:6,w:-1},{n:'Trine',d:120,o:5,w:0.7},{n:'Square',d:90,o:5,w:-0.7},{n:'Sextile',d:60,o:4,w:0.4},{n:'Quincunx',d:150,o:3,w:-0.2}];
+const PW={sun:1,moon:1.5,mercury:0.5,venus:0.8,mars:0.7,jupiter:1.2,saturn:1,rahu:0.6};
+const NP=['asc','sun','moon','mercury','venus','mars','jupiter','saturn'];
+
+function computeDay(doy){
+  const asp=[],tr={};
+  ['sun','moon','mercury','venus','mars','jupiter','saturn','rahu'].forEach(p=>{tr[p]=tpos(p,doy);});
+  let raw=0;
+  ['saturn','jupiter','mars','rahu'].forEach(tp=>{
+    NP.forEach(np=>{
+      if(NATAL[np]==null)return;
+      const df=adiff(tr[tp],NATAL[np]);
+      for(const a of ASPS){if(Math.abs(df-a.d)<=a.o){const st=1-Math.abs(df-a.d)/a.o,sc=a.w*PW[tp]*st*2;raw+=sc;asp.push({transit:tp,natal:np,aspName:a.n,weight:a.w,strength:st,score:sc,slow:true});break;}}
+    });
+  });
+  ['sun','moon','venus','mercury'].forEach(tp=>{
+    ['sun','moon','asc','jupiter'].forEach(np=>{
+      if(NATAL[np]==null)return;
+      const df=adiff(tr[tp],NATAL[np]);
+      for(const a of ASPS){if(Math.abs(df-a.d)<=a.o){const st=1-Math.abs(df-a.d)/a.o,sc=a.w*PW[tp]*st*0.8;raw+=sc;asp.push({transit:tp,natal:np,aspName:a.n,weight:a.w,strength:st,score:sc,slow:false});break;}}
+    });
+  });
+  const sc=Math.max(1,Math.min(7,Math.round(((Math.max(-8,Math.min(8,raw))+8)/16)*6)+1));
+  return{score:sc,aspects:asp,transits:tr};
+}
+
+let yearData=[];
+function buildYear(){
+  yearData=[];
+  for(let m=0;m<12;m++){
+    const days=new Date(2026,m+1,0).getDate(),arr=[];
+    for(let d=1;d<=days;d++){const date=new Date(2026,m,d),doy=getDOY(date);arr.push({date,d,m,doy,...computeDay(doy)});}
+    yearData.push(arr);
+  }
+}
+
+function smeta(s){return[null,
+  {label:'แย่มาก',color:'#e74c3c',bg:'#1a0808'},
+  {label:'แย่',color:'#e67e22',bg:'#1a1008'},
+  {label:'ธรรมดา',color:'#d4ac0d',bg:'#1a1a08'},
+  {label:'ดี',color:'#27ae60',bg:'#0a1a0a'},
+  {label:'ดีมาก',color:'#1abc9c',bg:'#081a14'},
+  {label:'ดีเยี่ยม',color:'#2e86c1',bg:'#080f1a'},
+  {label:'โดดเด่น',color:'#8e44ad',bg:'#10081a'}][s];}
+
+// ===== GROQ API =====
+function buildPrompt(day){
+  const meta=smeta(day.score);
+  const tDesc=Object.entries(day.transits).map(([p,deg])=>`${PNAMES[p]||p}อยู่ในราศี${signOf(deg)}`).join(', ');
+  const aDesc=day.aspects.length===0?'ไม่มีปฏิสัมพันธ์ดาวสำคัญ':
+    day.aspects.sort((a,b)=>Math.abs(b.score)-Math.abs(a.score)).slice(0,5)
+    .map(a=>`${PNAMES[a.transit]}${ANAMES[a.aspName]}${PNAMES[a.natal]}(${a.weight>0?'หนุน':'กดดัน'} ${a.strength>0.7?'แม่น':a.strength>0.4?'ปานกลาง':'อ่อน'} ${a.slow?'ผลยาว':'ผลสั้น'})`).join(', ');
+  return `คุณเป็นโหรผู้เชี่ยวชาญ วิเคราะห์ดวงชะตารายวันเป็นภาษาไทยธรรมดา เข้าใจง่าย ไม่ใช้ศัพท์โหราศาสตร์
+
+เจ้าของดวง: Y ชาย เกิด 21 มกราคม 2528 เวลา 04:50 น. กรุงเทพฯ ลัคนามกร เกิดวันจันทร์ บุคลิกจริงจัง รับผิดชอบ ทะเยอทะยาน
+วันที่: ${day.d} ${MONTH_FULL[day.m]} 2569 (${DOW_FULL[day.date.getDay()]})
+คะแนนดวงรวม: ${day.score}/7 (${meta.label})
+ตำแหน่งดาว: ${tDesc}
+ปฏิสัมพันธ์: ${aDesc}
+
+ตอบเป็น JSON เท่านั้น ไม่มีข้อความอื่น ไม่มี markdown:
+{"overall":"สรุปภาพรวม 2-3 ประโยค","do":["ควรทำ1","ควรทำ2","ควรทำ3"],"dont":["หลีกเลี่ยง1","หลีกเลี่ยง2","หลีกเลี่ยง3"],"areas":[{"icon":"💰","title":"การเงิน","level":"ดี","body":"1-2 ประโยค"},{"icon":"💼","title":"การงาน","level":"ธรรมดา","body":"1-2 ประโยค"},{"icon":"❤️","title":"คู่สมรส","level":"ดี","body":"1-2 ประโยค"},{"icon":"👥","title":"บริวาร","level":"ดี","body":"1-2 ประโยค"},{"icon":"👨‍👩‍👧","title":"ครอบครัว","level":"ธรรมดา","body":"1-2 ประโยค"},{"icon":"🚗","title":"การเดินทาง","level":"ดี","body":"1-2 ประโยค"},{"icon":"🏥","title":"สุขภาพ","level":"ดี","body":"1-2 ประโยค"}]}
+ค่า level: ดีมาก | ดี | ธรรมดา | ระวัง | แย่`;
+}
+
+async function fetchReading(day){
+  const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
+    body:JSON.stringify({model:GROQ_MODEL,temperature:0.7,max_tokens:1200,messages:[{role:'user',content:buildPrompt(day)}]})
+  });
+  if(!res.ok) throw new Error('Groq '+res.status);
+  const data=await res.json();
+  const text=data.choices[0].message.content.trim();
+  const match=text.match(/\{[\s\S]*\}/);
+  return JSON.parse(match?match[0]:text);
+}
+
+const cache={};
+function lvClass(l){ return l==='ดีมาก'||l==='ดี'?'lv-good':l==='ธรรมดา'?'lv-norm':l==='ระวัง'||l==='แย่'?'lv-warn':'lv-ok'; }
+
+// ===== PANEL =====
+let activeDay=null, selCell=null;
+
+async function openPanel(day){
+  if(selCell){selCell.style.borderColor='transparent';selCell.style.boxShadow='';}
+  const cells=document.querySelectorAll('#calWrap .cal-cell:not(.empty)');
+  selCell=cells[day.d-1];
+  if(selCell){selCell.style.borderColor='#fff';selCell.style.boxShadow='0 0 0 2px rgba(255,255,255,0.2)';}
+  activeDay=day;
+  const meta=smeta(day.score);
+  document.getElementById('panelContent').innerHTML=
+    '<div class="panel-date">'+day.d+' '+MONTH_FULL[day.m]+' 2569</div>'+
+    '<div class="panel-weekday">'+DOW_FULL[day.date.getDay()]+'</div>'+
+    '<div class="score-display">'+
+      '<div class="score-circle" style="color:'+meta.color+';border-color:'+meta.color+';background:'+meta.bg+'">'+
+        '<div class="score-num" style="color:'+meta.color+'">'+day.score+'</div>'+
+        '<div class="score-max" style="color:'+meta.color+'">/7</div>'+
+      '</div>'+
+      '<div><div class="score-label" style="color:'+meta.color+'">'+meta.label+'</div>'+
+      '<div class="score-desc">คะแนนดวงรวมวันนี้</div></div>'+
+    '</div>'+
+    '<div id="aiSection"><div class="ai-loading"><div class="ai-spinner"></div>กำลังวิเคราะห์ดวง...</div></div>';
+  document.getElementById('detailPanel').classList.add('open');
+  document.getElementById('overlay').classList.add('show');
+  const k=day.m+'-'+day.d;
+  try{
+    const r=cache[k]||(cache[k]=await fetchReading(day));
+    if(activeDay===day) renderReading(r);
+  } catch(e){
+    if(activeDay===day)
+      document.getElementById('aiSection').innerHTML=
+        '<div class="ai-error"><p>⚠️ โหลดไม่ได้ อาจ key หมดอายุหรือ quota เต็ม</p>'+
+        '<button class="retry-btn" onclick="retryPanel()">🔄 ลองใหม่</button></div>';
+  }
+}
+
+function retryPanel(){ if(activeDay){delete cache[activeDay.m+'-'+activeDay.d];openPanel(activeDay);} }
+
+function renderReading(r){
+  let html='<div class="overall-box"><h4>🌟 ภาพรวมวันนี้</h4><p>'+r.overall+'</p></div>';
+  html+='<div class="do-dont">'+
+    '<div class="do-box"><h5>✅ ควรทำ</h5><ul>'+r.do.map(i=>'<li>'+i+'</li>').join('')+'</ul></div>'+
+    '<div class="dont-box"><h5>⛔ ควรหลีกเลี่ยง</h5><ul>'+r.dont.map(i=>'<li>'+i+'</li>').join('')+'</ul></div>'+
+  '</div>';
+  r.areas.forEach(a=>{
+    html+='<div class="area-card"><div class="area-header">'+
+      '<div class="area-icon">'+a.icon+'</div>'+
+      '<div class="area-title">'+a.title+'</div>'+
+      '<div class="area-level '+lvClass(a.level)+'">'+a.level+'</div>'+
+      '</div><div class="area-body">'+a.body+'</div></div>';
+  });
+  document.getElementById('aiSection').innerHTML=html;
+}
+
+function closePanel(){
+  document.getElementById('detailPanel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+  if(selCell){selCell.style.borderColor='transparent';selCell.style.boxShadow='';selCell=null;}
+  activeDay=null;
+}
+
+// ===== CALENDAR =====
+let activeMonth=0;
+const todayD=new Date();todayD.setHours(0,0,0,0);
+
+function renderTabs(){
+  const el=document.getElementById('monthTabs');el.innerHTML='';
+  MONTH_TH.forEach((m,i)=>{
+    const t=document.createElement('div');
+    t.className='mtab'+(i===activeMonth?' active':'');
+    t.textContent=m; t.onclick=()=>{activeMonth=i;renderTabs();renderCal();};
+    el.appendChild(t);
+  });
+}
+
+function renderCal(){
+  const wrap=document.getElementById('calWrap');wrap.innerHTML='';
+  const days=yearData[activeMonth];
+  const firstDay=days[0].date.getDay();
+  const lbl=document.createElement('div');lbl.className='month-label';lbl.textContent=MONTH_FULL[activeMonth]+' 2569';wrap.appendChild(lbl);
+  const hdr=document.createElement('div');hdr.className='cal-header';
+  DOW_TH.forEach((d,i)=>{const el=document.createElement('div');el.className='cal-dow';el.textContent=d;if(i===0)el.style.color='#e74c3c';if(i===6)el.style.color='#3498db';hdr.appendChild(el);});
+  wrap.appendChild(hdr);
+  const grid=document.createElement('div');grid.className='cal-grid';
+  for(let i=0;i<firstDay;i++){const e=document.createElement('div');e.className='cal-cell empty';e.style.backgroundColor='transparent';grid.appendChild(e);}
+  days.forEach(day=>{
+    const meta=smeta(day.score);
+    const cell=document.createElement('div');cell.className='cal-cell';
+    cell.style.backgroundColor=meta.bg;
+    cell.style.borderColor=day.date.getTime()===todayD.getTime()?'#c9a84c':'transparent';
+    cell.innerHTML='<div class="cal-day" style="color:'+meta.color+'">'+day.d+'</div>'+
+      '<div class="cal-score" style="color:'+meta.color+'">'+day.score+'/7</div>'+
+      '<div class="cal-bar" style="background:'+meta.color+'"></div>';
+    cell.onclick=()=>openPanel(day);
+    grid.appendChild(cell);
+  });
+  wrap.appendChild(grid);
+}
+
+let startY=0;
+document.getElementById('detailPanel').addEventListener('touchstart',e=>{startY=e.touches[0].clientY;},{passive:true});
+document.getElementById('detailPanel').addEventListener('touchend',e=>{if(e.changedTouches[0].clientY-startY>80)closePanel();});
+
+function initApp(){
+  buildYear();
+  activeMonth=new Date().getFullYear()===2026?new Date().getMonth():0;
+  renderTabs();
+  renderCal();
+  if(new Date().getFullYear()===2026)
+    setTimeout(()=>openPanel(yearData[new Date().getMonth()][new Date().getDate()-1]),600);
+}
+</script>
+
+</body>
+</html>
