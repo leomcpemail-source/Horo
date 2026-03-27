@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ดวงรายวัน · 2569</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { background-color: #eef2f3; color: #1a2e35; font-family: 'Sarabun', Tahoma, Arial, sans-serif; min-height: 100vh; overscroll-behavior: none; max-width: 430px; margin: 0 auto; }
+
+/* SETUP */
+.setup-screen { position: fixed; inset: 0; background-color: #163844; z-index: 999; display: flex; align-items: center; justify-content: center; padding: 28px; }
+.setup-box { background-color: #fff; border-radius: 24px; padding: 32px 24px; width: 100%; }
+.setup-logo { font-family: ‘Prompt’, sans-serif; font-size: 20px; color: #1e4d5c; font-weight: 700; margin-bottom: 4px; }
+.setup-tagline { font-size: 13px; color: #7a9aa5; margin-bottom: 24px; }
+.setup-label { font-size: 12px; color: #1e4d5c; font-weight: 600; margin-bottom: 6px; display: block; }
+.setup-input { width: 100%; background-color: #eef2f3; border: 2px solid transparent; border-radius: 12px; padding: 12px 14px; color: #1a2e35; font-size: 13px; font-family: ‘Sarabun’, Tahoma, Arial, sans-serif; outline: none; margin-bottom: 14px; }
+.setup-input:focus { border-color: #f5a623; }
+.setup-btn { width: 100%; padding: 13px; background-color: #f5a623; color: #fff; border: none; border-radius: 14px; font-size: 15px; font-weight: 700; font-family: ‘Sarabun’, Tahoma, Arial, sans-serif; cursor: pointer; }
+.setup-btn:active { opacity: 0.85; }
+.setup-err { font-size: 12px; color: #e74c3c; margin-top: 8px; text-align: center; display: none; }
+.setup-hint { font-size: 11px; color: #7a9aa5; margin-bottom: 18px; line-height: 1.6; }
+.setup-hint a { color: #1e4d5c; }
+
+/* APP */
+.app { display: none; min-height: 100vh; background-color: #eef2f3; }
+.page { display: none; flex-direction: column; min-height: 100vh; }
+.page.active { display: flex; }
+
+/* TOP BAR */
+.top-bar { background-color: #163844; padding: 48px 20px 18px; }
+.top-bar-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.top-greeting { font-family: ‘Prompt’, sans-serif; font-size: 20px; color: #fff; font-weight: 700; line-height: 1.25; }
+.top-greeting-orange { color: #f5a623; }
+.profile-chip {
+display: flex; align-items: center; gap: 8px;
+background-color: rgba(255,255,255,0.1); border-radius: 20px;
+padding: 6px 12px 6px 6px; cursor: pointer;
+}
+.profile-avatar { width: 28px; height: 28px; border-radius: 50%; background-color: #f5a623; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.profile-name { font-size: 12px; color: #fff; font-weight: 600; }
+.profile-arrow { font-size: 10px; color: rgba(255,255,255,0.5); }
+
+/* WEEK NAV */
+.week-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.week-range-lbl { font-size: 12px; color: rgba(255,255,255,0.6); }
+.week-btns { display: flex; gap: 6px; }
+.week-btn { font-size: 11px; padding: 4px 11px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.75); background-color: transparent; cursor: pointer; font-family: ‘Sarabun’, Tahoma, Arial, sans-serif; }
+.week-btn-active { background-color: #f5a623; border-color: #f5a623; color: #fff; font-weight: 700; }
+
+/* DAY PICKER */
+.day-picker { display: flex; gap: 7px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.day-picker::-webkit-scrollbar { display: none; }
+.day-item { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; padding: 9px 11px; border-radius: 14px; cursor: pointer; background-color: rgba(255,255,255,0.1); min-width: 48px; }
+.day-item-active { background-color: #f5a623; }
+.day-item-today { background-color: rgba(245,166,35,0.22); }
+.day-dow { font-size: 10px; color: rgba(255,255,255,0.6); font-weight: 600; margin-bottom: 4px; }
+.day-num { font-family: ‘Prompt’, sans-serif; font-size: 17px; color: #fff; font-weight: 700; line-height: 1; }
+.day-pip { width: 4px; height: 4px; border-radius: 50%; margin-top: 5px; background-color: rgba(255,255,255,0.3); }
+.day-pip-active { background-color: #fff; }
+
+/* DASH BODY */
+.dash-body { flex: 1; padding: 18px 16px 95px; background-color: #eef2f3; }
+
+/* HERO CARD */
+.hero-card { background-color: #1e4d5c; border-radius: 22px; padding: 20px 20px 16px; margin-bottom: 16px; position: relative; overflow: hidden; }
+.hero-deco { position: absolute; right: -20px; top: -20px; width: 100px; height: 100px; border-radius: 50%; background-color: rgba(255,255,255,0.05); }
+.hero-deco2 { position: absolute; right: 25px; bottom: -28px; width: 70px; height: 70px; border-radius: 50%; background-color: rgba(255,255,255,0.04); }
+.hero-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.hero-lbl { font-size: 11px; color: rgba(255,255,255,0.6); letter-spacing: 0.5px; }
+.hero-date-txt { font-size: 11px; color: rgba(255,255,255,0.45); }
+.hero-main { display: flex; align-items: center; gap: 14px; }
+.hero-left { flex: 1; }
+.hero-score-lbl { font-size: 11px; color: rgba(255,255,255,0.6); margin-bottom: 3px; }
+.hero-score-row { display: flex; align-items: baseline; gap: 3px; }
+.hero-score-num { font-family: ‘Prompt’, sans-serif; font-size: 42px; color: #fff; font-weight: 700; line-height: 1; }
+.hero-score-denom { font-size: 15px; color: rgba(255,255,255,0.4); }
+.hero-badge { display: inline-block; background-color: #f5a623; color: #fff; font-size: 11px; font-weight: 700; padding: 3px 12px; border-radius: 20px; margin-top: 9px; }
+.hero-badge-bad { background-color: #e74c3c; }
+.hero-summary { font-size: 12px; color: rgba(255,255,255,0.75); line-height: 1.7; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1); }
+.hero-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+.hero-tag { font-size: 11px; padding: 3px 9px; border-radius: 20px; font-weight: 600; background-color: rgba(255,255,255,0.12); color: rgba(255,255,255,0.85); }
+.hero-tag-warn { background-color: rgba(231,76,60,0.3); color: #ff9080; }
+.hero-tag-boss { background-color: rgba(155,89,182,0.3); color: #d7aaff; }
+.hero-tag-good { background-color: rgba(46,204,113,0.25); color: #80ffb4; }
+.hero-tag-work { background-color: rgba(52,152,219,0.25); color: #80d4ff; }
+
+/* DONUT */
+.donut-wrap { position: relative; width: 86px; height: 86px; flex-shrink: 0; }
+.donut-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.donut-num { font-family: ‘Prompt’, sans-serif; font-size: 19px; color: #fff; font-weight: 700; line-height: 1; }
+.donut-sub { font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 2px; }
+
+/* AREA GRID */
+.sec-title { font-family: ‘Prompt’, sans-serif; font-size: 15px; font-weight: 700; color: #1a2e35; margin-bottom: 11px; }
+.area-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 14px; }
+.area-tile { background-color: #fff; border-radius: 16px; padding: 14px 12px; cursor: pointer; position: relative; overflow: hidden; box-shadow: 0 2px 8px rgba(30,77,92,0.07); }
+.area-tile:active { opacity: 0.82; }
+.area-icon-box { width: 30px; height: 30px; border-radius: 9px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; font-weight: 700; margin-bottom: 7px; }
+.area-lbl { font-size: 11px; color: #7a9aa5; font-weight: 600; margin-bottom: 3px; }
+.area-summary-txt { font-size: 12px; color: #1a2e35; font-weight: 600; line-height: 1.4; }
+.area-lv { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; margin-top: 5px; }
+.lv-good { background-color: #e8f8f0; color: #27ae60; }
+.lv-ok   { background-color: #fef9e7; color: #c9960a; }
+.lv-warn { background-color: #fdf0ef; color: #e74c3c; }
+.lv-norm { background-color: #f0f4f5; color: #5a8090; }
+.area-arrow { position: absolute; right: 9px; bottom: 9px; width: 20px; height: 20px; border-radius: 50%; background-color: #eef2f3; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #7a9aa5; font-weight: 700; }
+
+/* LOADING / ERROR */
+.loading-card { background-color: #fff; border-radius: 16px; padding: 28px; text-align: center; color: #7a9aa5; font-size: 13px; grid-column: span 2; box-shadow: 0 2px 8px rgba(30,77,92,0.07); }
+.spin { width: 26px; height: 26px; border: 3px solid #eef2f3; border-top-color: #f5a623; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 10px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.err-card { background-color: #fff; border-radius: 16px; padding: 22px; text-align: center; box-shadow: 0 2px 8px rgba(30,77,92,0.07); grid-column: span 2; }
+.err-txt { color: #e74c3c; font-size: 13px; margin-bottom: 10px; }
+.retry-btn { padding: 8px 20px; background-color: #1e4d5c; border: none; color: #fff; border-radius: 10px; cursor: pointer; font-size: 13px; font-family: ‘Sarabun’, Tahoma, Arial, sans-serif; font-weight: 600; }
+
+/* DETAIL PAGE */
+.detail-hdr { background-color: #163844; padding: 48px 20px 22px; }
+.back-btn { display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,0.7); font-size: 13px; cursor: pointer; margin-bottom: 14px; }
+.back-circle { width: 30px; height: 30px; border-radius: 50%; background-color: rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; font-size: 13px; color: #fff; font-weight: 700; }
+.detail-icon-box { width: 46px; height: 46px; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; font-weight: 700; margin-bottom: 9px; }
+.detail-title-txt { font-family: ‘Prompt’, sans-serif; font-size: 21px; color: #fff; font-weight: 700; }
+.detail-lv-badge { display: inline-block; padding: 4px 13px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-top: 7px; }
+.detail-body-wrap { flex: 1; padding: 18px 16px 95px; background-color: #eef2f3; overflow-y: auto; }
+.detail-card { background-color: #fff; border-radius: 16px; padding: 16px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(30,77,92,0.07); }
+.detail-card-title { font-size: 13px; color: #1e4d5c; font-weight: 700; margin-bottom: 7px; }
+.detail-card-body { font-size: 13px; color: #4a6670; line-height: 1.85; }
+.boss-card-detail { background-color: #1e4d5c; border-radius: 16px; padding: 16px; margin-bottom: 10px; }
+.boss-card-detail .detail-card-title { color: rgba(255,255,255,0.75); }
+.boss-card-detail .detail-card-body { color: rgba(255,255,255,0.9); }
+.dodont-row { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 10px; }
+.do-card { background-color: #eafaf1; border-radius: 14px; padding: 13px; }
+.dont-card { background-color: #fdf0ef; border-radius: 14px; padding: 13px; }
+.do-card-title { font-size: 12px; color: #27ae60; font-weight: 700; margin-bottom: 7px; }
+.dont-card-title { font-size: 12px; color: #e74c3c; font-weight: 700; margin-bottom: 7px; }
+.dodont-list { list-style: none; padding: 0; }
+.dodont-list li { font-size: 12px; color: #4a6670; line-height: 1.75; padding-left: 13px; position: relative; }
+.do-list li::before { content: ‘v’; position: absolute; left: 0; color: #27ae60; font-size: 10px; font-weight: 700; }
+.dont-list li::before { content: ‘x’; position: absolute; left: 0; color: #e74c3c; font-size: 10px; font-weight: 700; }
+
+/* GRAPH PAGE */
+.graph-body { flex: 1; padding: 18px 16px 95px; background-color: #eef2f3; overflow-y: auto; }
+.graph-period-tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+.g-tab { flex: 1; padding: 9px; text-align: center; border-radius: 12px; font-size: 13px; font-weight: 600; cursor: pointer; background-color: #fff; color: #7a9aa5; box-shadow: 0 2px 8px rgba(30,77,92,0.07); }
+.g-tab-active { background-color: #1e4d5c; color: #fff; }
+.graph-card { background-color: #fff; border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(30,77,92,0.07); }
+.graph-card-title { font-size: 13px; color: #1e4d5c; font-weight: 700; margin-bottom: 14px; }
+.bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 100px; }
+.bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.bar { width: 100%; border-radius: 6px 6px 0 0; min-height: 4px; transition: height 0.4s ease; }
+.bar-lbl { font-size: 9px; color: #7a9aa5; text-align: center; }
+.bar-val { font-size: 9px; color: #1a2e35; font-weight: 700; }
+.line-chart-wrap { position: relative; height: 120px; }
+canvas.line-chart { width: 100%; height: 120px; }
+.graph-legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+.graph-legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #7a9aa5; }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* PROFILE PAGE */
+.profile-body { flex: 1; padding: 18px 16px 95px; background-color: #eef2f3; overflow-y: auto; }
+.profile-header-card { background-color: #1e4d5c; border-radius: 16px; padding: 20px; margin-bottom: 14px; display: flex; align-items: center; gap: 14px; }
+.profile-big-avatar { width: 56px; height: 56px; border-radius: 50%; background-color: #f5a623; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.profile-info-name { font-family: ‘Prompt’, sans-serif; font-size: 18px; color: #fff; font-weight: 700; }
+.profile-info-sub { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 3px; line-height: 1.6; }
+.profile-card { background-color: #fff; border-radius: 16px; padding: 16px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(30,77,92,0.07); }
+.profile-card-title { font-size: 13px; color: #1e4d5c; font-weight: 700; margin-bottom: 10px; }
+.profile-list-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f4f5; cursor: pointer; }
+.profile-list-item:last-child { border-bottom: none; }
+.profile-list-left { display: flex; align-items: center; gap: 10px; }
+.profile-list-avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.profile-list-name { font-size: 13px; font-weight: 600; color: #1a2e35; }
+.profile-list-sub { font-size: 11px; color: #7a9aa5; }
+.profile-list-check { width: 20px; height: 20px; border-radius: 50%; background-color: #27ae60; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #fff; font-weight: 700; }
+.add-profile-btn { width: 100%; padding: 13px; background-color: #f5a623; color: #fff; border: none; border-radius: 14px; font-size: 14px; font-weight: 700; font-family: ‘Sarabun’, Tahoma, Arial, sans-serif; cursor: pointer; margin-top: 4px; }
+.add-profile-btn:active { opacity: 0.85; }
+
+/* ADD PROFILE MODAL */
+.modal-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); z-index: 500; display: none; align-items: flex-end; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal-box { background-color: #fff; border-radius: 24px 24px 0 0; padding: 24px 20px 40px; width: 100%; max-width: 430px; max-height: 90vh; overflow-y: auto; }
+.modal-handle { width: 36px; height: 4px; background-color: #e0e8ea; border-radius: 2px; margin: 0 auto 18px; }
+.modal-title { font-family: ‘Prompt’, sans-serif; font-size: 17px; font-weight: 700; color: #1e4d5c; margin-bottom: 18px; }
+.modal-label { font-size: 12px; color: #1e4d5c; font-weight: 600; margin-bottom: 6px; display: block; }
+.modal-input { width: 100%; background-color: #eef2f3; border: 2px solid transparent; border-radius: 12px; padding: 11px 14px; color: #1a2e35; font-size: 13px; font-family: ‘Sarabun’, Tahoma, Arial, sans-serif; outline: none; margin-bottom: 14px; }
+.modal-input:focus { border-color: #f5a623; }
+.upload-box { width: 100%; border: 2px dashed #b0ccd4; border-radius: 14px; padding: 24px; text-align: center; cursor: pointer; margin-bottom: 14px; background-color: #f8fbfc; }
+.upload-box-active { border-color: #f5a623; background-color: #fffbf0; }
+.upload-txt { font-size: 13px; color: #7a9aa5; line-height: 1.6; }
+.upload-hint { font-size: 11px; color: #b0ccd4; margin-top: 4px; }
+.upload-preview { width: 100%; border-radius: 10px; max-height: 200px; object-fit: contain; display: none; }
+.modal-btn { width: 100%; padding: 13px; background-color: #f5a623; color: #fff; border: none; border-radius: 14px; font-size: 14px; font-weight: 700; font-family: ‘Sarabun’, Tahoma, Arial, sans-serif; cursor: pointer; }
+.modal-btn:disabled { opacity: 0.5; cursor: default; }
+.modal-btn-sec { width: 100%; padding: 11px; background-color: transparent; color: #7a9aa5; border: 1px solid #d0dde0; border-radius: 14px; font-size: 13px; font-family: ‘Sarabun’, Tahoma, Arial, sans-serif; cursor: pointer; margin-top: 8px; }
+.modal-processing { text-align: center; padding: 16px; font-size: 13px; color: #7a9aa5; }
+
+/* BOTTOM NAV - 3 items only */
+.bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; background-color: #fff; border-top: 1px solid rgba(30,77,92,0.08); display: flex; align-items: center; justify-content: space-around; padding: 10px 20px 24px; box-shadow: 0 -4px 16px rgba(30,77,92,0.08); z-index: 50; }
+.nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; flex: 1; }
+.nav-bar-icon { width: 26px; height: 4px; border-radius: 3px; background-color: #ccdde2; margin-bottom: 2px; }
+.nav-bar-icon-active { background-color: #1e4d5c; }
+.nav-lbl { font-size: 10px; color: #7a9aa5; }
+.nav-lbl-active { color: #1e4d5c; font-weight: 700; }
+.nav-fab { width: 52px; height: 52px; border-radius: 50%; background-color: #f5a623; display: flex; align-items: center; justify-content: center; margin-top: -14px; box-shadow: 0 4px 14px rgba(245,166,35,0.4); cursor: pointer; flex-shrink: 0; }
+.nav-fab-inner { width: 20px; height: 3px; background-color: #fff; border-radius: 2px; position: relative; }
+.nav-fab-inner::before,.nav-fab-inner::after { content:’’; position:absolute; width:20px; height:3px; background-color:#fff; border-radius:2px; left:0; }
+.nav-fab-inner::before { top:-6px; }
+.nav-fab-inner::after { top:6px; }
+
+/* SETTINGS CHIP */
+.settings-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f4f5; }
+.settings-row:last-child { border-bottom: none; }
+.settings-row-lbl { font-size: 13px; color: #1a2e35; }
+.settings-row-val { font-size: 13px; color: #7a9aa5; }
+.change-key-btn { padding: 7px 16px; background-color: #eef2f3; border: none; border-radius: 10px; font-size: 12px; color: #5a8090; font-family: ‘Sarabun’, Tahoma, Arial, sans-serif; cursor: pointer; font-weight: 600; }
+</style>
+
+</head>
+<body>
+
+<!-- SETUP -->
+
+<div class="setup-screen" id="setupScreen">
+  <div class="setup-box">
+    <div class="setup-logo">ดวงรายวัน</div>
+    <div class="setup-tagline">ระบบดูดวงอัจฉริยะ · ปี 2569</div>
+    <label class="setup-label">Groq API Key</label>
+    <input class="setup-input" type="password" id="keyInput" placeholder="gsk_..." autocomplete="off" spellcheck="false">
+    <div class="setup-hint">Key เก็บในเครื่องนี้เท่านั้น ขอฟรีที่ <a href="https://console.groq.com" target="_blank">console.groq.com</a></div>
+    <button class="setup-btn" onclick="saveKey()">เข้าสู่ระบบ</button>
+    <div class="setup-err" id="setupErr">Key ไม่ถูกต้อง</div>
+  </div>
+</div>
+
+<!-- APP -->
+
+<div class="app" id="app">
+
+  <!-- PAGE: OVERVIEW (DASHBOARD) -->
+
+  <div class="page active" id="pageOverview">
+    <div class="top-bar">
+      <div class="top-bar-row">
+        <div class="top-greeting">ดวงชะตา<br><span class="top-greeting-orange" id="greetName">...</span></div>
+        <div class="profile-chip" onclick="switchToProfile()">
+          <div class="profile-avatar" id="topAvatar">Y</div>
+          <div class="profile-name" id="topName">Y</div>
+          <div class="profile-arrow">▾</div>
+        </div>
+      </div>
+      <div class="week-nav">
+        <div class="week-range-lbl" id="weekRangeLbl">สัปดาห์นี้</div>
+        <div class="week-btns">
+          <button class="week-btn week-btn-active" id="btnW0" onclick="setWeek(0)">สัปดาห์นี้</button>
+          <button class="week-btn" id="btnW1" onclick="setWeek(1)">สัปดาห์หน้า</button>
+        </div>
+      </div>
+      <div class="day-picker" id="dayPicker"></div>
+    </div>
+    <div class="dash-body" id="dashBody"></div>
+  </div>
+
+  <!-- PAGE: DETAIL -->
+
+  <div class="page" id="pageDetail">
+    <div class="detail-hdr">
+      <div class="back-btn" onclick="goBack()"><div class="back-circle">&lt;</div><span>กลับ</span></div>
+      <div class="detail-icon-box" id="detailIconBox" style="background-color:#1e4d5c;">$</div>
+      <div class="detail-title-txt" id="detailTitleTxt">รายละเอียด</div>
+      <div class="detail-lv-badge" id="detailBadge">ดี</div>
+    </div>
+    <div class="detail-body-wrap" id="detailBodyWrap"></div>
+  </div>
+
+  <!-- PAGE: GRAPH -->
+
+  <div class="page" id="pageGraph">
+    <div class="top-bar">
+      <div class="top-bar-row">
+        <div class="top-greeting">กราฟดวง<br><span class="top-greeting-orange" id="graphName">...</span></div>
+        <div class="profile-chip" onclick="switchToProfile()">
+          <div class="profile-avatar" id="graphAvatar">Y</div>
+          <div class="profile-name" id="graphNameChip">Y</div>
+          <div class="profile-arrow">▾</div>
+        </div>
+      </div>
+    </div>
+    <div class="graph-body" id="graphBody">
+      <div class="graph-period-tabs">
+        <div class="g-tab g-tab-active" onclick="setGraphPeriod('week',this)">สัปดาห์</div>
+        <div class="g-tab" onclick="setGraphPeriod('month',this)">เดือน</div>
+        <div class="g-tab" onclick="setGraphPeriod('year',this)">ปี</div>
+      </div>
+      <div id="graphContent"></div>
+    </div>
+  </div>
+
+  <!-- PAGE: PROFILE -->
+
+  <div class="page" id="pageProfile">
+    <div class="top-bar" style="padding-bottom:20px;">
+      <div class="top-bar-row" style="margin-bottom:0;">
+        <div class="top-greeting">โปรไฟล์</div>
+      </div>
+    </div>
+    <div class="profile-body" id="profileBody"></div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+
+  <div class="bottom-nav">
+    <div class="nav-item" id="navGraph" onclick="showPage('graph')">
+      <div class="nav-bar-icon" id="navBarGraph"></div>
+      <div class="nav-lbl" id="navLblGraph">กราฟ</div>
+    </div>
+    <div class="nav-fab" onclick="showPage('overview')">
+      <div class="nav-fab-inner"></div>
+    </div>
+    <div class="nav-item" id="navProfile" onclick="showPage('profile')">
+      <div class="nav-bar-icon" id="navBarProfile"></div>
+      <div class="nav-lbl" id="navLblProfile">โปรไฟล์</div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD PROFILE MODAL -->
+
+<div class="modal-overlay" id="addProfileModal">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-title">เพิ่มโปรไฟล์ใหม่</div>
+    <label class="modal-label">ชื่อ</label>
+    <input class="modal-input" id="newName" placeholder="ชื่อบุคคล">
+    <label class="modal-label">วันเกิด</label>
+    <input class="modal-input" id="newBirthDate" type="date" placeholder="YYYY-MM-DD">
+    <label class="modal-label">เวลาเกิด</label>
+    <input class="modal-input" id="newBirthTime" placeholder="04:50">
+    <label class="modal-label">สถานที่เกิด</label>
+    <input class="modal-input" id="newBirthPlace" placeholder="กรุงเทพมหานคร">
+    <label class="modal-label">อัปโหลดภาพ Birth Chart จาก astro.com</label>
+    <div class="upload-box" id="uploadBox" onclick="document.getElementById('chartFileInput').click()">
+      <div class="upload-txt">กดเพื่อเลือกภาพ<br>หรือลากภาพมาวางที่นี่</div>
+      <div class="upload-hint">รองรับ JPG, PNG (จาก astro.com)</div>
+      <img class="upload-preview" id="uploadPreview">
+    </div>
+    <input type="file" id="chartFileInput" accept="image/*" style="display:none" onchange="onFileSelect(event)">
+    <div id="modalProcessing" class="modal-processing" style="display:none">
+      <div class="spin" style="margin:0 auto 8px;"></div>
+      กำลังอ่านข้อมูลดาวจากภาพ...
+    </div>
+    <button class="modal-btn" id="modalSaveBtn" onclick="saveNewProfile()" disabled>บันทึกโปรไฟล์</button>
+    <button class="modal-btn-sec" onclick="closeModal()">ยกเลิก</button>
+  </div>
+</div>
+
+<script>
+// ===== CONFIG =====
+const SUPA_URL = 'https://jviyjuzxchiiemedbeff.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2aXlqdXp4Y2hpaWVtZWRiZWZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MzkyNTUsImV4cCI6MjA5MDIxNTI1NX0.-eIwTONa_GtbabOPpASEX_FtMoBxD8vkmP-If8gnEbA';
+const GROQ_MODEL = 'llama-3.3-70b-versatile';
+const LS_GROQ = 'groq_key_horo';
+const LS_PROFILE = 'active_profile_id';
+let GROQ_KEY = '';
+
+// ===== SUPABASE HELPERS =====
+async function sbGet(table, params='') {
+  const r = await fetch(SUPA_URL+'/rest/v1/'+table+'?'+params, {
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer '+SUPA_KEY }
+  });
+  return r.json();
+}
+async function sbPost(table, body) {
+  const r = await fetch(SUPA_URL+'/rest/v1/'+table, {
+    method: 'POST',
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer '+SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+    body: JSON.stringify(body)
+  });
+  return r.json();
+}
+async function sbUpsert(table, body, onConflict) {
+  const r = await fetch(SUPA_URL+'/rest/v1/'+table+'?on_conflict='+onConflict, {
+    method: 'POST',
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer '+SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation,resolution=merge-duplicates' },
+    body: JSON.stringify(body)
+  });
+  return r.json();
+}
+
+// ===== KEY =====
+function saveKey() {
+  const v = document.getElementById('keyInput').value.trim();
+  if(!v.startsWith('gsk_') || v.length < 20) { document.getElementById('setupErr').style.display='block'; return; }
+  localStorage.setItem(LS_GROQ, v); GROQ_KEY = v;
+  document.getElementById('setupScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  initApp();
+}
+function changeKey() { localStorage.removeItem(LS_GROQ); location.reload(); }
+document.getElementById('keyInput').addEventListener('keydown', e => { if(e.key==='Enter') saveKey(); });
+window.addEventListener('load', () => {
+  const s = localStorage.getItem(LS_GROQ);
+  if(s && s.startsWith('gsk_')) {
+    GROQ_KEY = s;
+    document.getElementById('setupScreen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    initApp();
+  }
+});
+
+// ===== PROFILE STATE =====
+let profiles = [];
+let activeProfile = null;
+
+async function loadProfiles() {
+  const data = await sbGet('profiles', 'order=created_at');
+  profiles = Array.isArray(data) ? data : [];
+  const savedId = localStorage.getItem(LS_PROFILE);
+  activeProfile = profiles.find(p => p.id === savedId) || profiles[0] || null;
+}
+
+function setActiveProfile(p) {
+  activeProfile = p;
+  localStorage.setItem(LS_PROFILE, p.id);
+  updateProfileUI();
+  cache = {};
+  loadDash();
+}
+
+function updateProfileUI() {
+  if(!activeProfile) return;
+  const n = activeProfile.name;
+  const abbr = n.slice(0,2);
+  document.getElementById('greetName').textContent = n;
+  document.getElementById('topAvatar').textContent = abbr;
+  document.getElementById('topName').textContent = n;
+  document.getElementById('graphName').textContent = n;
+  document.getElementById('graphAvatar').textContent = abbr;
+  document.getElementById('graphNameChip').textContent = n;
+}
+
+// ===== NATAL ENGINE =====
+const SIGNS = ['เมษ','พฤษภ','เมถุน','กรกฎ','สิงห์','กันย์','ตุลย์','พิจิก','ธนู','มกร','กุมภ์','มีน'];
+const PNAMES = {sun:'พระอาทิตย์',moon:'พระจันทร์',mercury:'พระพุธ',venus:'พระศุกร์',mars:'พระอังคาร',jupiter:'พระพฤหัส',saturn:'พระเสาร์',rahu:'พระราหู',asc:'ลัคนา'};
+const ANAMES = {Conjunction:'โคจรทับ',Opposition:'โคจรเผชิญหน้า',Trine:'โคจรเสริม',Square:'โคจรขัด',Sextile:'โคจรหนุน',Quincunx:'กดดันเล็กน้อย'};
+const MF = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const DS = ['อา','จ','อ','พ','พฤ','ศ','ส'];
+const DF = ['วันอาทิตย์','วันจันทร์','วันอังคาร','วันพุธ','วันพฤหัสบดี','วันศุกร์','วันเสาร์'];
+
+const DM  = {sun:0.9856,moon:13.1764,mercury:1.3833,venus:1.2,mars:0.524,jupiter:0.0831,saturn:0.0334,rahu:-0.0529};
+const B26 = {sun:280.5,moon:72.3,mercury:270.1,venus:315.4,mars:101.2,jupiter:58.8,saturn:345.6,rahu:11.2};
+const MR=[{s:50,e:72},{s:166,e:189},{s:281,e:305}];
+const VR=[{s:1,e:90}]; const JR=[{s:1,e:35}];
+
+function getDOY(d){ return Math.floor((d-new Date(2026,0,1))/86400000)+1; }
+function signOf(deg){ return SIGNS[Math.floor(((deg%360)+360)%360/30)]; }
+function tpos(p,doy){
+  let b=B26[p],m=DM[p];
+  if(p==='mercury')MR.forEach(r=>{if(doy>=r.s&&doy<=r.e)m=-m*0.8;});
+  if(p==='venus')  VR.forEach(r=>{if(doy>=r.s&&doy<=r.e)m=-0.5;});
+  if(p==='jupiter')JR.forEach(r=>{if(doy>=r.s&&doy<=r.e)m=-0.03;});
+  return((b+m*(doy-1))%360+360)%360;
+}
+function adiff(a,b){let d=Math.abs(a-b)%360;return d>180?360-d:d;}
+const ASPS=[{n:'Conjunction',d:0,o:6,w:1},{n:'Opposition',d:180,o:6,w:-1},{n:'Trine',d:120,o:5,w:0.7},{n:'Square',d:90,o:5,w:-0.7},{n:'Sextile',d:60,o:4,w:0.4},{n:'Quincunx',d:150,o:3,w:-0.2}];
+const PW={sun:1,moon:1.5,mercury:0.5,venus:0.8,mars:0.7,jupiter:1.2,saturn:1,rahu:0.6};
+const NP=['asc','sun','moon','mercury','venus','mars','jupiter','saturn'];
+
+function computeDay(doy, natal) {
+  const asp=[], tr={};
+  ['sun','moon','mercury','venus','mars','jupiter','saturn','rahu'].forEach(p=>{tr[p]=tpos(p,doy);});
+  let raw=0;
+  ['saturn','jupiter','mars','rahu'].forEach(t=>{
+    NP.forEach(n=>{
+      if(natal[n]==null)return;
+      const df=adiff(tr[t],natal[n]);
+      for(const a of ASPS){if(Math.abs(df-a.d)<=a.o){const st=1-Math.abs(df-a.d)/a.o,sc=a.w*PW[t]*st*2;raw+=sc;asp.push({transit:t,natal:n,aspName:a.n,weight:a.w,strength:st,score:sc,slow:true});break;}}
+    });
+  });
+  ['sun','moon','venus','mercury'].forEach(t=>{
+    ['sun','moon','asc','jupiter'].forEach(n=>{
+      if(natal[n]==null)return;
+      const df=adiff(tr[t],natal[n]);
+      for(const a of ASPS){if(Math.abs(df-a.d)<=a.o){const st=1-Math.abs(df-a.d)/a.o,sc=a.w*PW[t]*st*0.8;raw+=sc;asp.push({transit:t,natal:n,aspName:a.n,weight:a.w,strength:st,score:sc,slow:false});break;}}
+    });
+  });
+  const sc=Math.max(1,Math.min(10,Math.round(((Math.max(-8,Math.min(8,raw))+8)/16)*9)+1));
+  return{score:sc,aspects:asp,transits:tr};
+}
+
+// ===== WEEK =====
+let weekOffset=0, selDate=new Date(); selDate.setHours(0,0,0,0);
+function getWeekDates(off){
+  const now=new Date();now.setHours(0,0,0,0);
+  const dow=now.getDay();
+  const mon=new Date(now);mon.setDate(now.getDate()-dow+(dow===0?-6:1)+off*7);
+  const days=[];for(let i=0;i<7;i++){const d=new Date(mon);d.setDate(mon.getDate()+i);days.push(d);}
+  return days;
+}
+function setWeek(off){
+  weekOffset=off;
+  document.getElementById('btnW0').className='week-btn'+(off===0?' week-btn-active':'');
+  document.getElementById('btnW1').className='week-btn'+(off===1?' week-btn-active':'');
+  renderDayPicker();
+}
+function renderDayPicker(){
+  const days=getWeekDates(weekOffset);
+  const today=new Date();today.setHours(0,0,0,0);
+  const f=days[0],l=days[6];
+  document.getElementById('weekRangeLbl').textContent=f.getDate()+' '+MF[f.getMonth()].slice(0,3)+' - '+l.getDate()+' '+MF[l.getMonth()].slice(0,3);
+  const picker=document.getElementById('dayPicker');picker.innerHTML='';
+  days.forEach(d=>{
+    const isAct=d.getTime()===selDate.getTime(), isTod=d.getTime()===today.getTime();
+    const item=document.createElement('div');
+    item.className='day-item'+(isAct?' day-item-active':isTod?' day-item-today':'');
+    item.innerHTML='<div class="day-dow">'+DS[d.getDay()]+'</div><div class="day-num">'+d.getDate()+'</div><div class="day-pip'+(isAct?' day-pip-active':'')+'"></div>';
+    item.onclick=()=>{selDate=new Date(d);selDate.setHours(0,0,0,0);renderDayPicker();loadDash();};
+    picker.appendChild(item);
+  });
+}
+
+// ===== DONUT =====
+function buildDonut(score){
+  const pct=score/10,r=34,circ=2*Math.PI*r,dash=(pct*circ).toFixed(1);
+  const col=score>=6?'#f5a623':'#e74c3c';
+  return '<svg width="86" height="86" viewBox="0 0 86 86" style="transform:rotate(-90deg)">'+
+    '<circle cx="43" cy="43" r="'+r+'" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="9"/>'+
+    '<circle cx="43" cy="43" r="'+r+'" fill="none" stroke="'+col+'" stroke-width="9" stroke-linecap="round" stroke-dasharray="'+dash+' '+circ.toFixed(1)+'"/>'+
+    '</svg>';
+}
+
+// ===== SCORE META =====
+function smeta(s){
+  if(s>=9)return{label:'โดดเด่น',bad:false};
+  if(s>=7)return{label:'ดีมาก',bad:false};
+  if(s>=6)return{label:'ดี',bad:false};
+  if(s>=5)return{label:'ธรรมดา',bad:false};
+  if(s>=4)return{label:'แย่',bad:true};
+  return{label:'แย่มาก',bad:true};
+}
+function lvStyle(l){ return l==='ดีมาก'||l==='ดี'||l==='โดดเด่น'?'background-color:#e8f8f0;color:#27ae60;':l==='ธรรมดา'?'background-color:#f0f4f5;color:#5a8090;':'background-color:#fdf0ef;color:#e74c3c;'; }
+function lvClass(l){ return l==='ดีมาก'||l==='ดี'||l==='โดดเด่น'?'lv-good':l==='ธรรมดา'?'lv-norm':'lv-warn'; }
+
+// ===== AREA COLORS =====
+const AREA_COLORS={'การเงิน':'#f5a623','การงาน':'#1e4d5c','คู่สมรส':'#e74c3c','บริวาร':'#2980b9','ครอบครัว':'#8e44ad','การเดินทาง':'#27ae60','สุขภาพ':'#16a085','เจ้านาย / ผู้มีอำนาจ':'#7f8c8d'};
+const AREA_ABBR={'การเงิน':'฿','การงาน':'งาน','คู่สมรส':'รัก','บริวาร':'คน','ครอบครัว':'บ้าน','การเดินทาง':'เดิน','สุขภาพ':'สุข','เจ้านาย / ผู้มีอำนาจ':'นาย'};
+
+// ===== PROMPT =====
+function buildPrompt(date, score, aspects, transits, profile) {
+  const natal = profile.natal_data;
+  const meta = smeta(score);
+  const tDesc = Object.entries(transits).map(([p,deg])=>PNAMES[p]+'ในราศี'+signOf(deg)).join(', ');
+  const aDesc = aspects.length===0?'ไม่มีปฏิสัมพันธ์สำคัญ':
+    aspects.sort((a,b)=>Math.abs(b.score)-Math.abs(a.score)).slice(0,5)
+    .map(a=>PNAMES[a.transit]+(ANAMES[a.aspName]||a.aspName)+PNAMES[a.natal]+'('+(a.weight>0?'หนุน':'กดดัน')+' '+(a.strength>0.7?'แม่น':'อ่อน')+(a.slow?' ยาว':' สั้น')+')').join(', ');
+  const bdate = profile.birth_date ? profile.birth_date.replace(/-/g,'/') : '-';
+  return `คุณเป็นโหรผู้เชี่ยวชาญ วิเคราะห์ดวงชะตารายวันเป็นภาษาไทยธรรมดา สั้นกระชับ
+
+เจ้าของดวง: ${profile.name} เกิด ${bdate} เวลา ${profile.birth_time||''} น. ${profile.birth_place||''} ลัคนา${natal.asc_sign||''}
+วันที่: ${date.getDate()} ${MF[date.getMonth()]} 2569 (${DF[date.getDay()]})
+คะแนนดวง: ${score}/10 (${meta.label})
+ตำแหน่งดาว: ${tDesc}
+ปฏิสัมพันธ์: ${aDesc}
+
+ตอบ JSON เท่านั้น ห้ามมี markdown:
+{"tags":["tag1","tag2","tag3"],"overall":"สรุปภาพรวม 2 ประโยค","do":["ควรทำ1","ควรทำ2","ควรทำ3"],"dont":["หลีกเลี่ยง1","หลีกเลี่ยง2","หลีกเลี่ยง3"],"areas":[{"title":"การเงิน","level":"ดี","summary":"1 ประโยค","body":"2-3 ประโยค"},{"title":"การงาน","level":"ธรรมดา","summary":"1 ประโยค","body":"2-3 ประโยค"},{"title":"คู่สมรส","level":"ดี","summary":"1 ประโยค","body":"2-3 ประโยค"},{"title":"บริวาร","level":"ดี","summary":"1 ประโยค","body":"2-3 ประโยค"},{"title":"ครอบครัว","level":"ธรรมดา","summary":"1 ประโยค","body":"2-3 ประโยค"},{"title":"การเดินทาง","level":"ดี","summary":"1 ประโยค","body":"2-3 ประโยค"},{"title":"สุขภาพ","level":"ดี","summary":"1 ประโยค","body":"2-3 ประโยค"},{"title":"เจ้านาย / ผู้มีอำนาจ","level":"ดี","summary":"1 ประโยค","body":"2-3 ประโยคเกี่ยวกับเจ้านาย/ผู้มีอำนาจ เช่น เพ่งเล็ง โยกย้าย หรือสนับสนุน"}]}
+level: ดีมาก|ดี|ธรรมดา|ระวัง|แย่  tags: 3-4 คำ เช่น งานหนัก เครียด ระวังเจ้านาย โชคดี ป่วยได้`;
+}
+
+// ===== GROQ API =====
+let cache = {};
+async function fetchReading(date, profile) {
+  const k = profile.id + '_' + date.getFullYear() + '-' + (date.getMonth()+1) + '-' + date.getDate();
+  if(cache[k]) return cache[k];
+
+  // Try Supabase cache first
+  const dateStr = date.getFullYear()+'-'+String(date.getMonth()+1).padStart(2,'0')+'-'+String(date.getDate()).padStart(2,'0');
+  try {
+    const cached = await sbGet('readings', 'profile_id=eq.'+profile.id+'&reading_date=eq.'+dateStr+'&select=reading_data,score');
+    if(Array.isArray(cached) && cached.length > 0 && cached[0].reading_data) {
+      const r = cached[0].reading_data; r._score = cached[0].score;
+      cache[k] = r; return r;
+    }
+  } catch(e) {}
+
+  const natal = profile.natal_data;
+  const doy = getDOY(date);
+  const {score, aspects, transits} = computeDay(doy, natal);
+
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
+    body: JSON.stringify({model:GROQ_MODEL,temperature:0.7,max_tokens:1500,messages:[{role:'user',content:buildPrompt(date,score,aspects,transits,profile)}]})
+  });
+  if(!res.ok) throw new Error('Groq '+res.status);
+  const data = await res.json();
+  const text = data.choices[0].message.content.trim();
+  const match = text.match(/\{[\s\S]*\}/);
+  const r = JSON.parse(match ? match[0] : text);
+  r._score = score;
+  cache[k] = r;
+
+  // Save to Supabase
+  try {
+    await sbUpsert('readings', {profile_id:profile.id, reading_date:dateStr, score:score, reading_data:r}, 'profile_id,reading_date');
+  } catch(e) {}
+
+  return r;
+}
+
+// ===== TAG CLASS =====
+function tagCls(t){ const m={'งานหนัก':'hero-tag-work','งานเยอะ':'hero-tag-work','เครียด':'hero-tag-warn','ระวัง':'hero-tag-warn','ระวังเจ้านาย':'hero-tag-boss','เจ้านายจับตา':'hero-tag-boss','โยกย้าย':'hero-tag-boss','โชคดี':'hero-tag-good','เงินเข้า':'hero-tag-good','ดวงดี':'hero-tag-good','ป่วยได้':'hero-tag-warn','ระวังอุบัติเหตุ':'hero-tag-warn'};return m[t]||''; }
+
+// ===== LOAD DASHBOARD =====
+async function loadDash() {
+  if(!activeProfile) return;
+  const d = selDate;
+  const natal = activeProfile.natal_data;
+  const doy = getDOY(d);
+  const {score} = computeDay(doy, natal);
+  const meta = smeta(score);
+  const body = document.getElementById('dashBody');
+
+  body.innerHTML =
+    '<div class="hero-card">' +
+      '<div class="hero-deco"></div><div class="hero-deco2"></div>' +
+      '<div class="hero-top">' +
+        '<div class="hero-lbl">ดวงชะตาวันนี้</div>' +
+        '<div class="hero-date-txt">'+d.getDate()+' '+MF[d.getMonth()].slice(0,3)+' · '+DF[d.getDay()].replace('วัน','')+'</div>' +
+      '</div>' +
+      '<div class="hero-main">' +
+        '<div class="hero-left">' +
+          '<div class="hero-score-lbl">คะแนนดวงรวม</div>' +
+          '<div class="hero-score-row"><div class="hero-score-num">'+score+'</div><div class="hero-score-denom">/10</div></div>' +
+          '<div class="hero-badge'+(meta.bad?' hero-badge-bad':'')+'">'+meta.label+'</div>' +
+        '</div>' +
+        '<div class="donut-wrap">' + buildDonut(score) +
+          '<div class="donut-center"><div class="donut-num">'+score+'</div><div class="donut-sub">/ 10</div></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="hero-summary" id="heroSummary">กำลังวิเคราะห์...</div>' +
+      '<div class="hero-tags" id="heroTags"></div>' +
+    '</div>' +
+    '<div class="sec-title">ดวงแต่ละด้าน</div>' +
+    '<div class="area-grid" id="areaGrid">' +
+      '<div class="loading-card"><div class="spin"></div>กำลังวิเคราะห์ดวง...</div>' +
+    '</div>';
+
+  try {
+    const r = await fetchReading(d, activeProfile);
+
+    const se = document.getElementById('heroSummary');
+    if(se) se.textContent = r.overall || '';
+
+    const te = document.getElementById('heroTags');
+    if(te && r.tags) te.innerHTML = r.tags.map(t=>'<div class="hero-tag '+tagCls(t)+'">'+t+'</div>').join('');
+
+    const grid = document.getElementById('areaGrid');
+    if(!grid) return;
+    let html = '';
+
+    if(r.areas) {
+      r.areas.forEach(a => {
+        const col = AREA_COLORS[a.title] || '#7a9aa5';
+        const abbr = AREA_ABBR[a.title] || a.title.slice(0,2);
+        const sumShort = (a.summary || a.body || '').slice(0,28) + '...';
+        html += '<div class="area-tile" onclick="openDetail(\''+a.title+'\',\''+a.level+'\',\'area\',\''+a.title+'\')">' +
+          '<div class="area-icon-box" style="background-color:'+col+';">'+abbr+'</div>' +
+          '<div class="area-lbl">'+a.title+'</div>' +
+          '<div class="area-summary-txt">'+sumShort+'</div>' +
+          '<div class="area-lv '+lvClass(a.level)+'">'+a.level+'</div>' +
+          '<div class="area-arrow">›</div>' +
+        '</div>';
+      });
+    }
+
+    // Do/Don't tile
+    html += '<div class="area-tile" onclick="openDetail(\'คำแนะนำ\',\'ธรรมดา\',\'dodont\',\'\')">' +
+      '<div class="area-icon-box" style="background-color:#1e4d5c;">แนะ</div>' +
+      '<div class="area-lbl">คำแนะนำ</div>' +
+      '<div class="area-summary-txt">ควรทำและหลีกเลี่ยงวันนี้</div>' +
+      '<div class="area-lv lv-norm">ดูรายละเอียด</div>' +
+      '<div class="area-arrow">›</div>' +
+    '</div>';
+
+    grid.innerHTML = html;
+    window._r = r; window._d = d;
+
+  } catch(e) {
+    const grid = document.getElementById('areaGrid');
+    if(grid) grid.innerHTML = '<div class="err-card"><div class="err-txt">โหลดไม่ได้ ตรวจสอบ API Key</div><button class="retry-btn" onclick="loadDash()">ลองใหม่</button></div>';
+    const se = document.getElementById('heroSummary');
+    if(se) se.textContent = '';
+  }
+}
+
+// ===== DETAIL PAGE =====
+function openDetail(title, level, type, areaKey) {
+  const r = window._r, d = window._d;
+  if(!r) return;
+  const col = AREA_COLORS[title] || '#1e4d5c';
+  const abbr = AREA_ABBR[title] || title.slice(0,2);
+  document.getElementById('detailIconBox').textContent = abbr;
+  document.getElementById('detailIconBox').style.backgroundColor = col;
+  document.getElementById('detailTitleTxt').textContent = title;
+  const badge = document.getElementById('detailBadge');
+  badge.textContent = level; badge.style.cssText = 'display:inline-block;padding:4px 13px;border-radius:20px;font-size:12px;font-weight:700;margin-top:7px;'+lvStyle(level);
+
+  let html = '';
+  if(type === 'area' && r.areas) {
+    const a = r.areas.find(x => x.title === areaKey);
+    if(a) {
+      if(areaKey === 'เจ้านาย / ผู้มีอำนาจ') {
+        html += '<div class="boss-card-detail"><div class="detail-card-title">สถานการณ์กับเจ้านาย</div><div class="detail-card-body">'+a.body+'</div></div>';
+      } else {
+        html += '<div class="detail-card"><div class="detail-card-title">'+a.title+'</div><div class="detail-card-body">'+a.body+'</div></div>';
+      }
+    }
+  } else if(type === 'dodont') {
+    html += '<div class="dodont-row">' +
+      '<div class="do-card"><div class="do-card-title">ควรทำ</div><ul class="dodont-list do-list">'+(r.do||[]).map(i=>'<li>'+i+'</li>').join('')+'</ul></div>' +
+      '<div class="dont-card"><div class="dont-card-title">หลีกเลี่ยง</div><ul class="dodont-list dont-list">'+(r.dont||[]).map(i=>'<li>'+i+'</li>').join('')+'</ul></div>' +
+    '</div>';
+  }
+  html += '<div class="detail-card"><div class="detail-card-title">ภาพรวมวันที่ '+d.getDate()+' '+MF[d.getMonth()]+'</div><div class="detail-card-body">'+(r.overall||'')+'</div></div>';
+
+  document.getElementById('detailBodyWrap').innerHTML = html;
+  document.getElementById('pageOverview').classList.remove('active');
+  document.getElementById('pageDetail').classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function goBack() {
+  document.getElementById('pageDetail').classList.remove('active');
+  document.getElementById('pageOverview').classList.add('active');
+}
+
+// ===== GRAPH PAGE =====
+let graphPeriod = 'week';
+function setGraphPeriod(p, el) {
+  graphPeriod = p;
+  document.querySelectorAll('.g-tab').forEach(t => t.className = 'g-tab');
+  el.className = 'g-tab g-tab-active';
+  renderGraph();
+}
+
+function renderGraph() {
+  if(!activeProfile) return;
+  const natal = activeProfile.natal_data;
+  const today = new Date(); today.setHours(0,0,0,0);
+  let dates = [];
+
+  if(graphPeriod === 'week') {
+    for(let i=6;i>=0;i--){ const d=new Date(today);d.setDate(today.getDate()-i);dates.push(d); }
+  } else if(graphPeriod === 'month') {
+    for(let i=29;i>=0;i--){ const d=new Date(today);d.setDate(today.getDate()-i);dates.push(d); }
+  } else {
+    for(let i=11;i>=0;i--){ const d=new Date(2026,i,15);dates.push(d); }
+  }
+
+  const scores = dates.map(d => computeDay(getDOY(d), natal).score);
+
+  const gc = document.getElementById('graphContent');
+  if(graphPeriod === 'week') {
+    const maxS = Math.max(...scores);
+    const bars = dates.map((d,i) => {
+      const s = scores[i];
+      const h = Math.round((s/10)*80);
+      const col = s>=6?'#f5a623':s>=5?'#f5a623':'#e74c3c';
+      const isToday = d.getTime()===today.getTime();
+      return '<div class="bar-col">' +
+        '<div class="bar-val" style="color:'+col+'">'+s+'</div>' +
+        '<div class="bar" style="height:'+h+'px;background-color:'+col+';opacity:'+(isToday?1:0.6)+'"></div>' +
+        '<div class="bar-lbl">'+DS[d.getDay()]+'<br>'+d.getDate()+'</div>' +
+      '</div>';
+    }).join('');
+    gc.innerHTML = '<div class="graph-card"><div class="graph-card-title">คะแนนดวงรายวัน (7 วันล่าสุด)</div>' +
+      '<div class="bar-chart">'+bars+'</div></div>';
+
+  } else if(graphPeriod === 'month') {
+    const weeks = [];
+    for(let i=0;i<dates.length;i+=7){
+      const chunk=scores.slice(i,i+7);
+      weeks.push({avg:Math.round(chunk.reduce((a,b)=>a+b,0)/chunk.length),start:dates[i]});
+    }
+    const bars = weeks.map(w => {
+      const h = Math.round((w.avg/10)*80);
+      const col = w.avg>=6?'#f5a623':'#e74c3c';
+      return '<div class="bar-col">' +
+        '<div class="bar-val" style="color:'+col+'">'+w.avg+'</div>' +
+        '<div class="bar" style="height:'+h+'px;background-color:'+col+';opacity:0.75"></div>' +
+        '<div class="bar-lbl">'+w.start.getDate()+'/'+( w.start.getMonth()+1)+'</div>' +
+      '</div>';
+    }).join('');
+    gc.innerHTML = '<div class="graph-card"><div class="graph-card-title">เฉลี่ยคะแนนดวงรายสัปดาห์ (30 วันล่าสุด)</div>' +
+      '<div class="bar-chart">'+bars+'</div></div>';
+
+  } else {
+    const bars = dates.map((d,i) => {
+      const s = scores[i];
+      const h = Math.round((s/10)*80);
+      const col = s>=6?'#f5a623':'#e74c3c';
+      return '<div class="bar-col">' +
+        '<div class="bar-val" style="color:'+col+'">'+s+'</div>' +
+        '<div class="bar" style="height:'+h+'px;background-color:'+col+';opacity:0.75"></div>' +
+        '<div class="bar-lbl">'+MF[d.getMonth()].slice(0,3)+'</div>' +
+      '</div>';
+    }).join('');
+    const avg = Math.round(scores.reduce((a,b)=>a+b,0)/scores.length);
+    const best = Math.max(...scores), worst = Math.min(...scores);
+    gc.innerHTML = '<div class="graph-card"><div class="graph-card-title">คะแนนดวงรายเดือน ปี 2569</div>' +
+      '<div class="bar-chart">'+bars+'</div></div>' +
+      '<div class="graph-card">' +
+        '<div class="graph-card-title">สรุปปี 2569</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center">' +
+          '<div><div style="font-size:22px;font-weight:700;color:#f5a623;font-family:Prompt,sans-serif">'+avg+'</div><div style="font-size:11px;color:#7a9aa5;">เฉลี่ย</div></div>' +
+          '<div><div style="font-size:22px;font-weight:700;color:#27ae60;font-family:Prompt,sans-serif">'+best+'</div><div style="font-size:11px;color:#7a9aa5;">สูงสุด</div></div>' +
+          '<div><div style="font-size:22px;font-weight:700;color:#e74c3c;font-family:Prompt,sans-serif">'+worst+'</div><div style="font-size:11px;color:#7a9aa5;">ต่ำสุด</div></div>' +
+        '</div>' +
+      '</div>';
+  }
+}
+
+// ===== PROFILE PAGE =====
+function renderProfilePage() {
+  if(!activeProfile) return;
+  const p = activeProfile;
+  const abbr = p.name.slice(0,2);
+  const colors = ['#f5a623','#1e4d5c','#e74c3c','#2980b9','#8e44ad','#27ae60'];
+  const body = document.getElementById('profileBody');
+
+  let html = '<div class="profile-header-card">' +
+    '<div class="profile-big-avatar">'+abbr+'</div>' +
+    '<div>' +
+      '<div class="profile-info-name">'+p.name+'</div>' +
+      '<div class="profile-info-sub">เกิด: '+( p.birth_date||'-')+'<br>เวลา: '+(p.birth_time||'-')+' น. · '+(p.birth_place||'-')+'<br>ลัคนา: '+(p.natal_data?.asc_sign||'-')+'</div>' +
+    '</div>' +
+  '</div>';
+
+  html += '<div class="profile-card"><div class="profile-card-title">สลับโปรไฟล์</div>';
+  profiles.forEach((pr,i) => {
+    const col = colors[i % colors.length];
+    const isActive = pr.id === activeProfile.id;
+    html += '<div class="profile-list-item" onclick="setActiveProfile(profiles.find(x=>x.id===\''+pr.id+'\'))">' +
+      '<div class="profile-list-left">' +
+        '<div class="profile-list-avatar" style="background-color:'+col+';">'+pr.name.slice(0,2)+'</div>' +
+        '<div><div class="profile-list-name">'+pr.name+'</div><div class="profile-list-sub">ลัคนา '+( pr.natal_data?.asc_sign||'-')+'</div></div>' +
+      '</div>' +
+      (isActive ? '<div class="profile-list-check">v</div>' : '') +
+    '</div>';
+  });
+  html += '<button class="add-profile-btn" onclick="openModal()" style="margin-top:10px;">+ เพิ่มโปรไฟล์ใหม่</button></div>';
+
+  html += '<div class="profile-card"><div class="profile-card-title">ตั้งค่า</div>' +
+    '<div class="settings-row"><div class="settings-row-lbl">Groq API Key</div><button class="change-key-btn" onclick="changeKey()">เปลี่ยน</button></div>' +
+    '</div>';
+
+  body.innerHTML = html;
+}
+
+function switchToProfile() { showPage('profile'); }
+
+// ===== ADD PROFILE MODAL =====
+let uploadedImageBase64 = null;
+let parsedNatalData = null;
+
+function openModal() {
+  document.getElementById('addProfileModal').className = 'modal-overlay open';
+  uploadedImageBase64 = null; parsedNatalData = null;
+  document.getElementById('newName').value = '';
+  document.getElementById('newBirthDate').value = '';
+  document.getElementById('newBirthTime').value = '';
+  document.getElementById('newBirthPlace').value = '';
+  document.getElementById('uploadPreview').style.display = 'none';
+  document.getElementById('modalSaveBtn').disabled = true;
+  document.getElementById('modalProcessing').style.display = 'none';
+  document.querySelector('.upload-box .upload-txt').textContent = 'กดเพื่อเลือกภาพ\nหรือลากภาพมาวางที่นี่';
+}
+
+function closeModal() {
+  document.getElementById('addProfileModal').className = 'modal-overlay';
+}
+
+function onFileSelect(e) {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async (ev) => {
+    const b64 = ev.target.result.split(',')[1];
+    uploadedImageBase64 = b64;
+    document.getElementById('uploadPreview').src = ev.target.result;
+    document.getElementById('uploadPreview').style.display = 'block';
+    document.querySelector('.upload-box .upload-txt').textContent = 'ภาพถูกเลือกแล้ว';
+    // Parse natal chart from image
+    await parseChartImage(b64);
+  };
+  reader.readAsDataURL(file);
+}
+
+async function parseChartImage(b64) {
+  document.getElementById('modalProcessing').style.display = 'block';
+  document.getElementById('modalSaveBtn').disabled = true;
+  try {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
+      body: JSON.stringify({
+        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+        max_tokens: 800,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image_url', image_url: { url: 'data:image/jpeg;base64,'+b64 } },
+            { type: 'text', text: 'This is an astro.com natal chart. Extract the planetary positions in degrees. Respond ONLY in JSON, no markdown:\n{"asc":0.0,"sun":0.0,"moon":0.0,"mercury":0.0,"venus":0.0,"mars":0.0,"jupiter":0.0,"saturn":0.0,"uranus":0.0,"neptune":0.0,"pluto":0.0,"rahu":0.0,"asc_sign":"","sun_sign":"","moon_sign":""}\nFor degrees use absolute ecliptic degrees (0-360). Aries=0-30, Taurus=30-60, etc. Extract sign names in Thai: เมษ พฤษภ เมถุน กรกฎ สิงห์ กันย์ ตุลย์ พิจิก ธนู มกร กุมภ์ มีน' }
+          ]
+        }]
+      })
+    });
+    const data = await res.json();
+    const text = data.choices[0].message.content.trim();
+    const match = text.match(/\{[\s\S]*\}/);
+    parsedNatalData = JSON.parse(match ? match[0] : text);
+    parsedNatalData.source = 'astro.com (parsed by AI)';
+    document.querySelector('.upload-box .upload-txt').textContent = 'อ่านข้อมูลดาวสำเร็จ';
+    document.getElementById('modalSaveBtn').disabled = false;
+  } catch(e) {
+    document.querySelector('.upload-box .upload-txt').textContent = 'อ่านภาพไม่ได้ ลองอีกครั้ง';
+    // Allow manual save without natal parse
+    document.getElementById('modalSaveBtn').disabled = false;
+  }
+  document.getElementById('modalProcessing').style.display = 'none';
+}
+
+async function saveNewProfile() {
+  const name = document.getElementById('newName').value.trim();
+  const bdate = document.getElementById('newBirthDate').value;
+  const btime = document.getElementById('newBirthTime').value;
+  const bplace = document.getElementById('newBirthPlace').value;
+  if(!name) { alert('กรุณากรอกชื่อ'); return; }
+
+  document.getElementById('modalSaveBtn').disabled = true;
+  document.getElementById('modalSaveBtn').textContent = 'กำลังบันทึก...';
+
+  const natal = parsedNatalData || {};
+  try {
+    const result = await sbPost('profiles', {name, birth_date: bdate||null, birth_time: btime||null, birth_place: bplace||null, natal_data: natal});
+    if(Array.isArray(result) && result[0]) {
+      profiles.push(result[0]);
+      setActiveProfile(result[0]);
+      closeModal();
+      showPage('overview');
+    }
+  } catch(e) {
+    alert('บันทึกไม่สำเร็จ ลองใหม่');
+  }
+  document.getElementById('modalSaveBtn').disabled = false;
+  document.getElementById('modalSaveBtn').textContent = 'บันทึกโปรไฟล์';
+}
+
+// ===== PAGE NAVIGATION =====
+function showPage(name) {
+  ['overview','graph','profile'].forEach(p => {
+    document.getElementById('page'+p.charAt(0).toUpperCase()+p.slice(1)).classList.remove('active');
+  });
+  document.getElementById('page'+name.charAt(0).toUpperCase()+name.slice(1)).classList.add('active');
+
+  // Nav highlight
+  ['graph','profile'].forEach(n => {
+    document.getElementById('navBar'+n.charAt(0).toUpperCase()+n.slice(1)).className = 'nav-bar-icon'+(name===n?' nav-bar-icon-active':'');
+    document.getElementById('navLbl'+n.charAt(0).toUpperCase()+n.slice(1)).className = 'nav-lbl'+(name===n?' nav-lbl-active':'');
+  });
+
+  if(name === 'graph') renderGraph();
+  if(name === 'profile') renderProfilePage();
+  window.scrollTo(0,0);
+}
+
+// ===== INIT =====
+async function initApp() {
+  await loadProfiles();
+  if(!activeProfile && profiles.length === 0) {
+    // No profiles yet - shouldn't happen since Y is seeded
+    document.getElementById('dashBody').innerHTML = '<div style="padding:20px;text-align:center;color:#7a9aa5;">ไม่พบโปรไฟล์ กรุณาเพิ่มโปรไฟล์ใหม่</div>';
+    return;
+  }
+  updateProfileUI();
+  let d = new Date(); d.setHours(0,0,0,0);
+  if(d.getFullYear() !== 2026) d = new Date(2026, 2, 28);
+  selDate = d; weekOffset = 0;
+  renderDayPicker();
+  loadDash();
+}
+</script>
+
+</body>
+</html>
