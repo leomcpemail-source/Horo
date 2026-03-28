@@ -1,1 +1,1 @@
-# Horo
+# Astrolyze
